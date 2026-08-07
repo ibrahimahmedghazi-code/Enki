@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Enki Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0c;--s1:#111114;--s2:#18181d;--s3:#222228;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.14);--accent:#7f77dd;--accent-bg:rgba(127,119,221,0.1);--accent-light:#afa9ec;--green:#1d9e75;--green-bg:rgba(29,158,117,0.1);--red:#d85a30;--text:#e8e8f0;--muted:#6b6b7a;--muted2:#9090a0;--mono:'IBM Plex Mono',monospace;--sans:'Syne',sans-serif;--r:10px;}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13px;display:flex;min-height:100vh}
+aside{width:200px;min-height:100vh;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1.5rem 1rem;gap:2px;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;overflow-y:auto}
+.logo{font-family:var(--sans);font-size:20px;font-weight:700;color:var(--text);margin-bottom:1.75rem}
+.logo span{display:block;font-size:11px;font-weight:400;color:var(--muted);font-family:var(--mono);margin-top:2px}
+.nav-section{font-size:10px;color:var(--muted);letter-spacing:1.5px;padding:.75rem .5rem .4rem;margin-top:.5rem}
+nav a{display:flex;align-items:center;gap:9px;padding:.5rem .6rem;border-radius:7px;color:var(--muted2);text-decoration:none;font-size:12px;cursor:pointer;transition:all .15s;user-select:none}
+nav a:hover{background:var(--s2);color:var(--text)}
+nav a.active{background:var(--accent-bg);color:var(--accent-light)}
+nav a svg{width:14px;height:14px;flex-shrink:0;opacity:.8}
+.sidebar-footer{margin-top:auto;padding-top:1rem;border-top:1px solid var(--border);font-size:11px;color:var(--muted);line-height:1.7}
+.server-input{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-family:var(--mono);font-size:11px;margin-top:4px;outline:none}
+.server-input:focus{border-color:var(--border2)}
+main{margin-left:200px;flex:1;padding:2rem 2rem 4rem;max-width:980px}
+.page{display:none}.page.active{display:block}
+.page-header{margin-bottom:2rem}
+.page-header h1{font-family:var(--sans);font-size:26px;font-weight:700;color:var(--text);margin-bottom:4px}
+.page-header p{color:var(--muted2);font-size:12px}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem;margin-bottom:1rem}
+.card-title{font-size:10px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:1rem}
+.steps{display:flex;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:1.5rem}
+.step-tab{flex:1;padding:.6rem .75rem;font-size:11px;color:var(--muted);background:var(--s1);border-right:1px solid var(--border);display:flex;align-items:center;gap:7px;transition:all .2s}
+.step-tab:last-child{border-right:none}
+.step-tab.active{background:var(--accent-bg);color:var(--accent-light)}
+.step-tab.done{color:var(--green)}
+.step-num{width:18px;height:18px;border-radius:50%;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.step-tab.active .step-num{background:var(--accent);color:#fff}
+.step-tab.done .step-num{background:var(--green);color:#fff;font-size:9px}
+.field{margin-bottom:.9rem}
+label{display:block;font-size:11px;color:var(--muted2);margin-bottom:.35rem}
+input[type=text],input[type=number],select,textarea{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:.5rem .7rem;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;transition:border .15s;appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--border2)}
+select option{background:var(--s2)}
+textarea{resize:vertical;min-height:72px;line-height:1.5}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.stars{display:flex;gap:3px;margin-top:2px}
+.star{font-size:18px;cursor:pointer;color:var(--s3);transition:color .1s;user-select:none;line-height:1}
+.star.on{color:#ef9f27}
+.drop-zone{border:1px dashed var(--border2);border-radius:var(--r);padding:1.25rem;text-align:center;cursor:pointer;position:relative;transition:all .2s}
+.drop-zone:hover{border-color:var(--accent);background:var(--accent-bg)}
+.drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.drop-zone p{color:var(--muted2);font-size:12px;line-height:1.6}
+.drop-zone strong{color:var(--text)}
+.thumb-preview{width:100%;height:120px;object-fit:cover;border-radius:8px;margin-top:.5rem;display:none}
+.module-block{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:1rem;margin-bottom:.6rem}
+.module-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
+.module-label{font-size:11px;color:var(--accent-light);font-weight:500}
+.btn-xs{background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted2);font-family:var(--mono);font-size:11px;padding:3px 9px;cursor:pointer;transition:all .15s}
+.btn-xs:hover{border-color:var(--border2);color:var(--text)}
+.btn-xs.del:hover{border-color:var(--red);color:var(--red)}
+.lec-row{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:.6rem .75rem;margin-bottom:6px}
+.lec-top{display:grid;grid-template-columns:2.5fr 60px 110px 28px;gap:6px;align-items:end}
+.lec-top input,.lec-top select{font-size:11px;padding:.4rem .5rem}
+.type-toggle{display:flex;height:30px;background:var(--s3);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.type-toggle button{flex:1;background:none;border:none;color:var(--muted2);font-family:var(--mono);font-size:10px;cursor:pointer;transition:all .15s;padding:0 4px}
+.type-toggle button.on{background:var(--accent-bg);color:var(--accent-light)}
+.del-lec{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;transition:color .15s;padding:0;height:30px}
+.del-lec:hover{color:var(--red)}
+.lec-content{margin-top:.6rem;display:none}
+.lec-content.show{display:block}
+.md-label{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:.4rem}
+.prog-wrap{background:var(--s3);border-radius:4px;height:4px;overflow:hidden;margin-top:.6rem;display:none}
+.prog-bar{height:100%;background:var(--accent);width:0%;transition:width .3s;border-radius:4px}
+.prog-wrap.show{display:block}
+.btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:.55rem 1.25rem;font-family:var(--mono);font-size:12px;font-weight:500;cursor:pointer;transition:background .15s}
+.btn:hover{background:var(--accent-light);color:#111}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-ghost{background:none;border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:.55rem 1.25rem;font-family:var(--mono);font-size:12px;cursor:pointer;transition:all .15s}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent-light)}
+.btn-row{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1.25rem}
+.upload-slot{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;margin-bottom:.5rem}
+.upload-slot-header{display:flex;align-items:center;gap:8px;margin-bottom:.5rem}
+.upload-slot-title{font-size:12px;color:var(--text);flex:1}
+.upload-slot-type{font-size:10px;padding:2px 7px;border-radius:4px;background:var(--accent-bg);color:var(--accent-light)}
+.upload-slot-type.article{background:var(--green-bg);color:#5dcaa5}
+.upload-row{display:flex;align-items:center;gap:.75rem}
+.upload-row input[type=file]{font-size:11px;color:var(--muted2);flex:1}
+.upload-status{font-size:11px;flex-shrink:0;min-width:80px;text-align:right}
+.upload-status.waiting{color:var(--muted)}.upload-status.uploading{color:#ef9f27}.upload-status.done{color:#5dcaa5}.upload-status.err{color:var(--red)}
+.course-item{display:flex;align-items:center;gap:.9rem;padding:.75rem 0;border-bottom:1px solid var(--border)}
+.course-item:last-child{border-bottom:none}
+.course-thumb-img{width:48px;height:48px;border-radius:8px;object-fit:cover;background:var(--accent-bg);flex-shrink:0}
+.course-info{flex:1;min-width:0}
+.course-name{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.course-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.badge{font-size:10px;padding:2px 8px;border-radius:20px;background:var(--accent-bg);color:var(--accent-light);flex-shrink:0}
+.badge.green{background:var(--green-bg);color:#5dcaa5}
+.media-item{display:flex;align-items:center;gap:.75rem;padding:.65rem 0;border-bottom:1px solid var(--border)}
+.media-item:last-child{border-bottom:none}
+.media-name{flex:1;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.media-size{font-size:11px;color:var(--muted);flex-shrink:0}
+.media-type-badge{font-size:10px;color:var(--muted2);background:var(--s3);padding:2px 6px;border-radius:4px;flex-shrink:0}
+.copy-btn{background:none;border:1px solid var(--border);border-radius:5px;color:var(--muted2);font-family:var(--mono);font-size:10px;padding:3px 8px;cursor:pointer;transition:all .15s;flex-shrink:0}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent-light)}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--s2);border:1px solid var(--border2);border-radius:10px;padding:.75rem 1rem;font-size:12px;display:none;align-items:center;gap:8px;z-index:999;max-width:300px;animation:sup .2s ease}
+.toast.show{display:flex}.toast.ok{border-color:var(--green)}.toast.err{border-color:var(--red)}
+@keyframes sup{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--muted);font-size:12px}
+.empty-icon{font-size:28px;margin-bottom:.6rem}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0;display:inline-block}
+.dot.ok{background:var(--green)}.dot.err{background:var(--red)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1.25rem}
+.stat{background:var(--s2);border-radius:8px;padding:.85rem 1rem}
+.stat-val{font-family:var(--sans);font-size:22px;font-weight:700;color:var(--text)}
+.stat-label{font-size:10px;color:var(--muted);margin-top:2px}
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="logo">Enki <span>admin portal</span></div>
+  <div class="nav-section">Content</div>
+  <nav>
+    <a class="active" onclick="nav('upload',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Add course</a>
+    <a onclick="nav('courses',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Courses</a>
+    <a onclick="nav('media',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Media</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span class="dot" id="conn-dot"></span><span id="conn-label" style="color:var(--muted2)">not connected</span></div>
+    API base URL
+    <input class="server-input" id="base-url" value="http://localhost:8000" oninput="saveUrl()"/>
+    <div style="margin-top:.6rem"><button class="btn-xs" onclick="testConn()">test connection</button></div>
+  </div>
+</aside>
+
+<main>
+
+<div class="page active" id="page-upload">
+  <div class="page-header"><h1>Add a course</h1><p>Fill details → build modules → create course → upload files.</p></div>
+  <div class="steps">
+    <div class="step-tab active" id="stab1"><div class="step-num">1</div> Course info</div>
+    <div class="step-tab" id="stab2"><div class="step-num">2</div> Modules & lectures</div>
+    <div class="step-tab" id="stab3"><div class="step-num">3</div> Upload files</div>
+  </div>
+
+  <!-- Step 1 -->
+  <div id="sp1">
+    <div class="card">
+      <div class="card-title">Basic info</div>
+      <div class="field"><label>Course title *</label><input type="text" id="c-title" placeholder="e.g. Flutter from Zero to Hero"/></div>
+      <div class="grid2">
+        <div class="field"><label>Author *</label><input type="text" id="c-author" placeholder="Instructor name"/></div>
+        <div class="field"><label>Category *</label><select id="c-cat"><option value="">Select...</option><option>IT</option><option>Language</option><option>Engineering</option><option>Math</option><option>Medical</option><option>Management</option><option>Science</option><option>Design</option></select></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>Level / Stage</label><select id="c-stage"><option value="">Select...</option><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select></div>
+        <div class="field"><label>Rating</label><div class="stars" id="stars"><span class="star" data-v="1">★</span><span class="star" data-v="2">★</span><span class="star" data-v="3">★</span><span class="star" data-v="4">★</span><span class="star" data-v="5">★</span></div><input type="hidden" id="c-rating" value="0"/></div>
+      </div>
+      <div class="field"><label>Description</label><textarea id="c-desc" placeholder="What will students learn?"></textarea></div>
+      <div class="field">
+        <label>Course thumbnail *</label>
+        <div class="drop-zone" id="thumb-dz">
+          <input type="file" id="thumb-file" accept="image/*" onchange="previewThumb(this)"/>
+          <p id="thumb-label"><strong>Click or drag</strong> an image (.jpg, .png, .webp)</p>
+        </div>
+        <img id="thumb-preview" class="thumb-preview" alt="thumbnail preview"/>
+      </div>
+    </div>
+    <div class="btn-row"><button class="btn" onclick="goStep(2)">Next — Modules →</button></div>
+  </div>
+
+  <!-- Step 2 -->
+  <div id="sp2" style="display:none">
+    <div class="card">
+      <div class="card-title">Course structure</div>
+      <div id="mod-list"></div>
+      <button class="btn-xs" onclick="addMod()" style="margin-top:.5rem">+ Add module</button>
+    </div>
+    <div class="btn-row"><button class="btn-ghost" onclick="goStep(1)">← Back</button><button class="btn" id="create-btn" onclick="createCourseAndProceed()">Create course & go to upload →</button></div>
+  </div>
+
+  <!-- Step 3 -->
+  <div id="sp3" style="display:none">
+    <div class="card">
+      <div class="card-title">Upload files for each lecture</div>
+      <p style="color:var(--muted2);font-size:12px;margin-bottom:1.25rem">Course created. Upload a video or markdown file for each lecture. Each file is linked directly to its lecture in the database.</p>
+      <div id="upload-slots"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Status</div>
+      <div id="submit-status-text" style="font-size:12px;color:var(--muted2);margin-bottom:.5rem">Ready to upload.</div>
+      <div class="prog-wrap show"><div class="prog-bar" id="s-bar"></div></div>
+      <div style="margin-top:1rem;display:flex;gap:.75rem">
+        <button class="btn" id="upload-all-btn" onclick="uploadAll()">Upload all files</button>
+        <button class="btn-ghost" onclick="resetForm()">Add another course</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-courses">
+  <div class="page-header"><h1>Courses</h1><p>Top 10 by rating from your database.</p></div>
+  <div class="stats"><div class="stat"><div class="stat-val" id="st-courses">—</div><div class="stat-label">courses</div></div><div class="stat"><div class="stat-val" id="st-modules">—</div><div class="stat-label">modules</div></div><div class="stat"><div class="stat-val" id="st-lecs">—</div><div class="stat-label">lectures</div></div></div>
+  <div class="card"><div id="course-list"><div class="empty"><div class="empty-icon">📚</div>Click Courses to load.</div></div></div>
+</div>
+
+<div class="page" id="page-media">
+  <div class="page-header"><h1>Media library</h1><p>All videos, articles and images on your server.</p></div>
+  <div class="card"><div id="media-list"><div class="empty"><div class="empty-icon">🎬</div>Click Media to load.</div></div></div>
+</div>
+
+</main>
+
+<div class="toast" id="toast"><span id="t-icon">✓</span><span id="t-msg"></span></div>
+
+<script>
+let API = localStorage.getItem('enki_url') || 'http://localhost:8000';
+document.getElementById('base-url').value = API;
+function saveUrl(){ API = document.getElementById('base-url').value.trim().replace(/\/$/,''); localStorage.setItem('enki_url',API); }
+
+async function testConn(){
+  const dot=document.getElementById('conn-dot'), lbl=document.getElementById('conn-label');
+  try{
+    const r=await fetch(API+'/api/v1/courses/top',{signal:AbortSignal.timeout(4000)});
+    if(r.ok){dot.className='dot ok';lbl.textContent='connected';toast('Connected!','ok')}else throw 0;
+  }catch{dot.className='dot err';lbl.textContent='unreachable';toast('Cannot reach API','err')}
+}
+
+function nav(page,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  el.classList.add('active');
+  if(page==='courses') loadCourses();
+  if(page==='media') loadMedia();
+}
+
+let curStep=1;
+function goStep(n){
+  if(n===2&&!validateS1()) return;
+  document.getElementById('sp'+curStep).style.display='none';
+  document.getElementById('sp'+n).style.display='block';
+  for(let i=1;i<=3;i++){
+    const t=document.getElementById('stab'+i);
+    t.classList.remove('active','done');
+    if(i<n){t.classList.add('done');t.querySelector('.step-num').textContent='✓';}
+    if(i===n) t.classList.add('active');
+    if(i>n) t.querySelector('.step-num').textContent=i;
+  }
+  curStep=n;
+}
+
+function validateS1(){
+  if(!v('c-title')||!v('c-author')||!v('c-cat')){toast('Title, author and category required','err');return false;}
+  return true;
+}
+
+let rating=0;
+document.querySelectorAll('.star').forEach(s=>{
+  s.onclick=()=>{rating=parseInt(s.dataset.v);document.getElementById('c-rating').value=rating;document.querySelectorAll('.star').forEach(x=>x.classList.toggle('on',parseInt(x.dataset.v)<=rating));};
+});
+
+function previewThumb(input){
+  if(!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('thumb-preview');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    document.getElementById('thumb-label').innerHTML = '<strong>'+input.files[0].name+'</strong>';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+// ── Module / lecture builder ────────────────────────────────────
+let modCount=0, lecCounters={}, lecTypes={}, lecContent={};
+
+function addMod(){
+  modCount++;const m=modCount;lecCounters[m]=0;
+  const div=document.createElement('div');
+  div.className='module-block';div.id='m'+m;
+  div.innerHTML=`<div class="module-header"><span class="module-label">Module ${m}</span><div style="display:flex;gap:5px"><button class="btn-xs" onclick="addLec(${m})">+ lecture</button><button class="btn-xs del" onclick="this.closest('.module-block').remove()">remove</button></div></div><div id="lecs-${m}"></div>`;
+  document.getElementById('mod-list').appendChild(div);
+  addLec(m);
+}
+
+function addLec(m){
+  lecCounters[m]++;
+  const id=m+'_'+lecCounters[m];
+  lecTypes[id]=true;
+  const row=document.createElement('div');
+  row.className='lec-row';row.id='l'+id;
+  row.innerHTML=`
+    <div class="lec-top">
+      <input type="text" placeholder="Lecture title" data-id="${id}" data-f="title"/>
+      <input type="number" placeholder="min" min="1" data-id="${id}" data-f="dur"/>
+      <div class="type-toggle">
+        <button class="on" onclick="setType('${id}',true,this)">Video</button>
+        <button onclick="setType('${id}',false,this)">Article</button>
+      </div>
+      <button class="del-lec" onclick="document.getElementById('l${id}').remove()">✕</button>
+    </div>
+    <div class="lec-content" id="lc-${id}">
+      <div class="md-label" style="margin-top:.5rem">Markdown content</div>
+      <textarea placeholder="Write markdown here..." style="min-height:100px;margin-top:.4rem" oninput="lecContent['${id}']=this.value"></textarea>
+    </div>`;
+  document.getElementById('lecs-'+m).appendChild(row);
+}
+
+function setType(id,isVid,btn){
+  lecTypes[id]=isVid;
+  btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('lc-'+id).classList.toggle('show',!isVid);
+}
+
+// ── Create course ───────────────────────────────────────────────
+let createdCourseData = null;
+
+async function createCourseAndProceed(){
+  const btn = document.getElementById('create-btn');
+  btn.disabled = true;
+  btn.textContent = 'Creating...';
+
+  // 1. Upload thumbnail first if provided
+  let imagePath = 'assets/images/app_icon.png';
+  const thumbFile = document.getElementById('thumb-file').files[0];
+  if(thumbFile){
+    try{
+      const fd = new FormData();
+      fd.append('file', thumbFile);
+      const r = await fetch(API+'/api/v1/upload/image', {method:'POST', body:fd});
+      if(r.ok){
+        const data = await r.json();
+        imagePath = data.filename; // just filename, Flutter builds URL
+      }
+    }catch(e){
+      toast('Image upload failed, using default','err');
+    }
+  }
+
+  // 2. Build modules payload
+  const mods=[];
+  document.querySelectorAll('.module-block').forEach((mb,mi)=>{
+    const mid=mb.id.slice(1);
+    const lecs=[];
+    let order=0;
+    document.querySelectorAll('#lecs-'+mid+' .lec-row').forEach(lr=>{
+      order++;
+      const id=lr.id.slice(1);
+      lecs.push({
+        title:lr.querySelector('[data-f="title"]').value||'Untitled',
+        duration_minutes:parseInt(lr.querySelector('[data-f="dur"]').value)||0,
+        lecture_order:order,
+        is_it_video:lecTypes[id]===true
+      });
+    });
+    mods.push({number_of_module:mi+1,lectures:lecs});
+  });
+
+  const payload={
+    title:v('c-title'),author:v('c-author'),description:v('c-desc'),
+    category:v('c-cat'),stage:v('c-stage'),
+    rating:parseFloat(document.getElementById('c-rating').value)||0,
+    image_path: imagePath,
+    modules:mods
+  };
+
+  try{
+    const r=await fetch(API+'/api/v1/courses/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(!r.ok) throw new Error(await r.text());
+    createdCourseData = await r.json();
+    toast('Course created! Now upload lecture files.','ok');
+    buildUploadSlots();
+    goStep(3);
+  }catch(e){
+    toast('Failed: '+e.message,'err');
+  }finally{
+    btn.disabled=false;
+    btn.textContent='Create course & go to upload →';
+  }
+}
+
+// ── Build upload slots ──────────────────────────────────────────
+function buildUploadSlots(){
+  const container = document.getElementById('upload-slots');
+  container.innerHTML = '';
+  if(!createdCourseData||!createdCourseData.modules) return;
+
+  createdCourseData.modules.forEach((mod) => {
+    const modLabel = document.createElement('div');
+    modLabel.style.cssText='font-size:11px;color:var(--accent-light);margin:.75rem 0 .4rem;font-weight:500';
+    modLabel.textContent=`Module ${mod.number_of_module}`;
+    container.appendChild(modLabel);
+
+    mod.lectures.forEach((lec, li) => {
+      const slot = document.createElement('div');
+      slot.className='upload-slot';
+      slot.id='slot-'+lec.lectureid;
+      const isVid = lec.is_it_video;
+      const accept = isVid ? 'video/*' : '.md,text/markdown';
+
+      slot.innerHTML=`
+        <div class="upload-slot-header">
+          <span class="upload-slot-title">Lecture ${li+1}: ${lec.title}</span>
+          <span class="upload-slot-type ${isVid?'':'article'}">${isVid?'video':'article'}</span>
+        </div>
+        <div class="upload-row">
+          <input type="file" accept="${accept}" data-lectureid="${lec.lectureid}" data-isvideo="${isVid}"/>
+          <span class="upload-status waiting" id="st-${lec.lectureid}">waiting</span>
+        </div>`;
+      container.appendChild(slot);
+    });
+  });
+}
+
+// ── Upload all files ────────────────────────────────────────────
+async function uploadAll(){
+  const btn = document.getElementById('upload-all-btn');
+  btn.disabled = true;
+  const slots = document.querySelectorAll('#upload-slots input[type=file]');
+  let done=0, total=0;
+  slots.forEach(s=>{ if(s.files[0]) total++; });
+  if(total===0){toast('No files selected.','err');btn.disabled=false;return;}
+
+  setStatus('Uploading files...',0);
+
+  for(const slot of slots){
+    const lectureid=slot.dataset.lectureid;
+    const isVideo=slot.dataset.isvideo==='true';
+    const st=document.getElementById('st-'+lectureid);
+    if(!slot.files[0]){st.className='upload-status';st.textContent='skipped';continue;}
+
+    st.className='upload-status uploading';st.textContent='uploading...';
+
+    try{
+      const fd=new FormData();
+      fd.append('file',slot.files[0]);
+      const endpoint=isVideo
+        ? `/api/v1/upload/video/${createdCourseData.courseid}`
+        : `/api/v1/upload/markdown/${createdCourseData.courseid}`;
+
+      const uploadRes=await fetch(API+endpoint,{method:'POST',body:fd});
+      if(!uploadRes.ok) throw new Error('Upload failed');
+      const {url}=await uploadRes.json(); // url = just filename now
+
+      // Save filename to lecture
+      const linkRes=await fetch(API+`/api/v1/lectures/${lectureid}/url`,{
+        method:'PUT',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({lectureurl: url}),
+      });
+      if(!linkRes.ok) throw new Error('Failed to link URL');
+
+      st.className='upload-status done';st.textContent='✓ done';
+      done++;
+    }catch(e){
+      st.className='upload-status err';st.textContent='✕ failed';
+    }
+
+    setStatus(`Uploaded ${done}/${total}`,Math.round(done/total*100));
+  }
+
+  setStatus(`Done — ${done}/${total} uploaded`,100);
+  toast(`${done}/${total} files uploaded!`,'ok');
+  btn.disabled=false;
+}
+
+function setStatus(msg,pct){
+  document.getElementById('submit-status-text').textContent=msg;
+  document.getElementById('s-bar').style.width=pct+'%';
+}
+
+function resetForm(){
+  createdCourseData=null;modCount=0;lecCounters={};lecTypes={};lecContent={};
+  document.getElementById('mod-list').innerHTML='';
+  ['c-title','c-author','c-desc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('c-cat').value='';
+  document.getElementById('c-stage').value='';
+  document.getElementById('c-rating').value='0';
+  document.getElementById('thumb-preview').style.display='none';
+  document.getElementById('thumb-label').innerHTML='<strong>Click or drag</strong> an image';
+  document.getElementById('thumb-file').value='';
+  rating=0;
+  document.querySelectorAll('.star').forEach(s=>s.classList.remove('on'));
+  goStep(1);addMod();
+}
+
+// ── Load courses ────────────────────────────────────────────────
+async function loadCourses(){
+  const el=document.getElementById('course-list');
+  el.innerHTML='<div class="empty"><div class="empty-icon">⏳</div>Loading...</div>';
+  try{
+    const r=await fetch(API+'/api/v1/courses/top');
+    if(!r.ok) throw new Error(r.status);
+    const data=await r.json();
+    document.getElementById('st-courses').textContent=data.length;
+    let tm=0,tl=0;
+    data.forEach(c=>{tm+=(c.modules||[]).length;(c.modules||[]).forEach(m=>{tl+=(m.lectures||[]).length;});});
+    document.getElementById('st-modules').textContent=tm;
+    document.getElementById('st-lecs').textContent=tl;
+    if(!data.length){el.innerHTML='<div class="empty"><div class="empty-icon">📚</div>No courses yet.</div>';return;}
+    el.innerHTML=data.map(c=>{
+      const imgSrc = c.imagepath && !c.imagepath.startsWith('assets')
+        ? `${API}/api/v1/stream/image/${c.imagepath}`
+        : '';
+      const thumbHtml = imgSrc
+        ? `<img src="${imgSrc}" class="course-thumb-img" onerror="this.style.display='none'"/>`
+        : `<div class="course-thumb-img" style="background:var(--accent-bg);display:flex;align-items:center;justify-content:center">📚</div>`;
+      return `<div class="course-item">
+        ${thumbHtml}
+        <div class="course-info">
+          <div class="course-name">${c.title}</div>
+          <div class="course-meta">${c.author} · ${c.category} · ${c.stage||'—'}</div>
+        </div>
+        <span class="badge">★ ${(c.rating||0).toFixed(1)}</span>
+        <span class="badge green">${(c.modules||[]).length} mod</span>
+      </div>`;
+    }).join('');
+  }catch(e){el.innerHTML='<div class="empty"><div class="empty-icon">⚠</div>Cannot reach API.</div>';}
+}
+
+// ── Load media ──────────────────────────────────────────────────
+async function loadMedia(){
+  const el=document.getElementById('media-list');
+  el.innerHTML='<div class="empty"><div class="empty-icon">⏳</div>Loading...</div>';
+  try{
+    const r=await fetch(API+'/api/v1/media/list');
+    if(!r.ok) throw new Error();
+    const data=await r.json();
+    if(!data.length){el.innerHTML='<div class="empty"><div class="empty-icon">🎬</div>No files yet.</div>';return;}
+    el.innerHTML=data.map(f=>`<div class="media-item">
+      <span style="font-size:14px">${f.type==='video'?'▶':f.type==='image'?'🖼':'📄'}</span>
+      <span class="media-name">${f.filename}</span>
+      <span class="media-size">${fmtBytes(f.size_bytes)}</span>
+      <span class="media-type-badge">${f.type}</span>
+      <button class="copy-btn" onclick="navigator.clipboard.writeText('${f.url}');toast('URL copied','ok')">copy</button>
+    </div>`).join('');
+  }catch{el.innerHTML='<div class="empty"><div class="empty-icon">⚠</div>Cannot load media.</div>';}
+}
+
+function fmtBytes(b){if(b>1e9)return(b/1e9).toFixed(1)+' GB';if(b>1e6)return(b/1e6).toFixed(1)+' MB';return(b/1e3).toFixed(0)+' KB';}
+function v(id){return document.getElementById(id).value.trim()}
+function toast(msg,type='ok'){const el=document.getElementById('toast');document.getElementById('t-msg').textContent=msg;document.getElementById('t-icon').textContent=type==='ok'?'✓':'⚠';el.className='toast show '+type;clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),3200);}
+
+addMod();
+testConn();
+</script>
+</body>
+</html>
